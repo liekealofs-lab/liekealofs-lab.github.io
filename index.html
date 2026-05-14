@@ -3,71 +3,143 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Student Progress Webapp</title>
+  <title>SuperSpetters App</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
-  <header>
-    <h1>Studentenoverzicht</h1>
+  <!-- 🔵 HEADER -->
+  <header class="main-header">
+    <div class="header-left">
+      <button id="to-home" class="btn-header">🏠 Hoofdmenu</button>
+      <button id="back-button" class="btn-header">← Terug</button>
+    </div>
+
+    <h2 id="header-title">SuperSpetters</h2>
+
+    <div class="header-right">
+      <button id="add-student-button" class="btn-header primary">+ Nieuwe superspetter</button>
+    </div>
   </header>
 
-  <main>
+  <!-- 🏠 HOME -->
+  <section id="home-page">
+    <div class="page-header">
+      <h1 class="home-title">Welkom Lieke</h1>
+    </div>
 
-    <!-- GROEPEN -->
-    <div id="groups-container">
+    <div class="home-grid">
+      <button id="home-superspetters" class="home-card">🧒 SuperSpetters</button>
+      <button id="home-agenda" class="home-card">📅 Agenda</button>
+    </div>
+  </section>
+
+  <!-- 👧 GROEPEN -->
+  <section id="groups-container" class="hidden">
+    <div class="page-header">
       <h2>Groepen</h2>
-
-      <!-- KNOP STAAT HIER -->
-      <button id="add-student-button" class="primary-button">+ Student toevoegen</button>
-
-      <div id="groups-list"></div>
     </div>
+    <div id="groups-list"></div>
+  </section>
 
-    <!-- STUDENTEN -->
-    <div id="students-container" style="display:none;">
-      <button id="back-to-groups" class="secondary-button">← Terug</button>
+  <!-- 👩 STUDENTENLIJST -->
+  <section id="students-container" class="hidden">
+    <div class="page-header">
       <h2 id="group-title"></h2>
-      <div id="students-list"></div>
+      <div class="search-toolbar">
+        <input id="student-search" type="text" placeholder="Zoek superspetter...">
+      </div>
+    </div>
+    <div id="students-list"></div>
+  </section>
+
+  <!-- 🧾 STUDENT DETAIL -->
+  <section id="student-edit" class="hidden">
+    <div class="student-header-card">
+      <div class="student-header-left">
+        <div class="student-name-row">
+          <h2 id="student-name">Naam leerling</h2>
+          <button id="edit-name-button" class="btn-icon edit-icon">✏️</button>
+        </div>
+
+        <div class="student-group-row">
+          <span id="student-group-badge" class="group-badge">Groep X</span>
+          <button id="edit-group-button" class="btn-icon edit-icon">✏️</button>
+        </div>
+      </div>
+
+      <div class="student-header-right">
+        <div class="sticker-wrapper">
+          <span id="student-sticker" class="sticker-circle">0</span>
+          <button id="edit-sticker-button" class="btn-icon">✏️</button>
+        </div>
+      </div>
     </div>
 
-    <!-- STUDENT BEWERKEN -->
-    <div id="student-edit" style="display:none;">
-      <button id="back-to-students">← Terug</button>
-      <h2 id="student-name"></h2>
+    <form id="student-form" class="student-form-card hidden">
+      <div class="form-row">
+        <label for="edit-firstname">Naam</label>
+        <input type="text" id="edit-firstname">
+      </div>
 
-      <form id="student-form">
-        <label>Groep:</label>
-        <span id="group-value"></span>
+      <div class="form-row">
+        <label for="edit-group">Groep</label>
+        <select id="edit-group">
+          <option value="MiniSpetters">MiniSpetters</option>
+          <option value="Beginners">Beginners</option>
+          <option value="Gevorderden">Gevorderden</option>
+          <option value="Uitblinkers">Uitblinkers</option>
+        </select>
+      </div>
 
-        <label>Sticker:</label>
-        <input type="number" id="sticker">
+      <div class="form-actions">
+        <button id="save-student-edit" class="btn btn-primary">Opslaan</button>
+        <button id="delete-student" class="btn btn-danger">Verwijderen</button>
+      </div>
+    </form>
 
-        <h3>Vaardigheden</h3>
-        <div id="skills-list"></div>
-      </form>
+    <h2 class="section-title">Vaardigheden</h2>
+    <div id="skills-list"></div>
+  </section>
+
+  <!-- 📅 AGENDA -->
+  <section id="agenda-page" class="hidden">
+    <div class="page-header">
+      <h2>Agenda</h2>
+    </div>
+    <div class="calendar-container">
+      <div id="calendar"></div>
     </div>
 
-  </main>
+    <div class="vacation-form">
+      <h3>Vakantie toevoegen</h3>
+      <label>Naam</label>
+      <input type="text" id="vacation-title">
+      <label>Startdatum</label>
+      <input type="date" id="vacation-start">
+      <label>Einddatum</label>
+      <input type="date" id="vacation-end">
+      <button id="add-vacation" class="btn btn-primary">Toevoegen</button>
+    </div>
+  </section>
 
-  <!-- POPUP: STUDENT TOEVOEGEN -->
-  <div id="add-student-modal" class="modal" style="display:none;">
+  <!-- ➕ MODAL -->
+  <div id="add-student-modal" class="modal hidden">
     <div class="modal-content">
-      <h3>Nieuwe student</h3>
-
-      <label>Voornaam:</label>
+      <h3>Nieuwe superspetter</h3>
+      <label>Naam</label>
       <input id="new-student-name" type="text">
-
-      <label>Groep:</label>
+      <label>Groep</label>
       <select id="new-student-group">
         <option value="MiniSpetters">MiniSpetters</option>
         <option value="Beginners">Beginners</option>
         <option value="Gevorderden">Gevorderden</option>
         <option value="Uitblinkers">Uitblinkers</option>
       </select>
-
-      <button id="save-student-button">Opslaan</button>
-      <button id="cancel-student-button">Annuleren</button>
+      <div class="modal-actions">
+        <button id="save-student-button" class="btn btn-primary">Opslaan</button>
+        <button id="cancel-student-button" class="btn btn-secondary">Annuleren</button>
+      </div>
     </div>
   </div>
 
