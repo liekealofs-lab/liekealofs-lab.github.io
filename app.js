@@ -54,6 +54,8 @@ const stickerInput = document.getElementById('sticker');
 const skillsList = document.getElementById('skills-list');
 const backToGroups = document.getElementById('back-to-groups');
 const backToStudents = document.getElementById('back-to-students');
+const navGroups = document.getElementById('nav-groups');
+const navStudents = document.getElementById('nav-students');
 
 // ===============================
 // INIT
@@ -116,7 +118,7 @@ async function showStudents(group) {
   for (const student of filtered) {
     const studentProgress = await apiGet(`/progress/${student.id}`);
 
-    const totalSkills = skills.length;
+    const totalSkills = skills.length || 1;
     const totalScore = studentProgress.reduce((sum, p) => sum + p.score, 0);
     const avg = Math.round((totalScore / (totalSkills * 3)) * 100);
 
@@ -264,7 +266,8 @@ saveStudentButton.addEventListener("click", async () => {
     firstname,
     group,
     sticker,
-    startDate: new Date().toISOString().split("T")[0]
+    startDate: new Date().toISOString().split("T")[0],
+    note: ""
   });
 
   addStudentModal.style.display = "none";
@@ -282,35 +285,6 @@ saveStudentButton.addEventListener("click", async () => {
 backToGroups.addEventListener("click", loadGroups);
 backToStudents.addEventListener("click", () => showStudents(currentGroup));
 navGroups.addEventListener("click", loadGroups);
-navStudents.addEventListener("click", () => showStudents(currentGroup));
-// ===============================
-// ADD GROUP POPUP
-// ===============================
-const addGroupButton = document.getElementById("add-group-button");
-const addGroupModal = document.getElementById("add-group-modal");
-const newGroupName = document.getElementById("new-group-name");
-const saveGroupButton = document.getElementById("save-group-button");
-const cancelGroupButton = document.getElementById("cancel-group-button");
-
-addGroupButton.addEventListener("click", () => {
-  addGroupModal.style.display = "block";
-});
-
-cancelGroupButton.addEventListener("click", () => {
-  addGroupModal.style.display = "none";
-  newGroupName.value = "";
-});
-
-saveGroupButton.addEventListener("click", async () => {
-  const name = newGroupName.value.trim();
-  if (!name) return;
-
-  // Backend moet een /groups endpoint hebben
-  await apiPost("/groups", { name });
-
-  addGroupModal.style.display = "none";
-  newGroupName.value = "";
-
-  await loadAllData();
-  loadGroups();
+navStudents.addEventListener("click", () => {
+  if (currentGroup) showStudents(currentGroup);
 });
