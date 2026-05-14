@@ -614,3 +614,8 @@ details summary {
     font-size: 1.8rem;
   }
 }
+@media (max-width: 768px) {
+  .header-right {
+    display: none;
+  }
+}

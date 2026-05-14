@@ -89,6 +89,7 @@ function cacheDOM() {
   toHome = document.getElementById("to-home");
   backButton = document.getElementById("back-button");
   addStudentButton = document.getElementById("add-student-button");
+  fab = document.getElementById("fab");
 
   addStudentModal = document.getElementById("add-student-modal");
   newStudentName = document.getElementById("new-student-name");
@@ -105,12 +106,32 @@ function cacheDOM() {
 
   homeSuperspetters = document.getElementById("home-superspetters");
   homeAgenda = document.getElementById("home-agenda");
+  
 }
 
 // ======================================================
 // EVENTS
 // ======================================================
 function attachEvents() {
+
+    // ⬇️ zwevende + knop
+  fab.addEventListener("click", () => {
+    // Als je op de agenda zit → focus op vakantieformulier
+    if (!agendaPage.classList.contains("hidden")) {
+      document.getElementById("vacation-title").scrollIntoView({ behavior: "smooth" });
+      document.getElementById("vacation-title").focus();
+      return;
+    }
+
+    // Anders: zelfde gedrag als "Nieuwe superspetter"
+    if (groupsContainer.classList.contains("hidden") &&
+        studentsContainer.classList.contains("hidden")) {
+      alert("Ga eerst naar een groep of studentenlijst.");
+      return;
+    }
+    addStudentModal.classList.remove("hidden");
+  });
+}
   // Home-tegels
   homeSuperspetters.addEventListener("click", () => {
     showGroups();
