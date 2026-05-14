@@ -30,12 +30,10 @@ async function apiPatch(path, body) {
 }
 
 // ===============================
-// DATA (GEEN MOCK DATA)
+// DATA
 // ===============================
 let students = [];
 let skills = [];
-let progress = [];
-
 let currentGroup = "";
 let currentStudent = null;
 
@@ -56,9 +54,6 @@ const stickerInput = document.getElementById('sticker');
 const skillsList = document.getElementById('skills-list');
 const backToGroups = document.getElementById('back-to-groups');
 const backToStudents = document.getElementById('back-to-students');
-const studentSearch = document.getElementById('student-search');
-const navGroups = document.getElementById('nav-groups');
-const navStudents = document.getElementById('nav-students');
 
 // ===============================
 // INIT
@@ -234,6 +229,51 @@ groupSelect.addEventListener("change", async () => {
 stickerInput.addEventListener("change", async () => {
   await apiPatch(`/students/${currentStudent.id}`, { sticker: Number(stickerInput.value) });
   currentStudent.sticker = Number(stickerInput.value);
+});
+
+// ===============================
+// ADD STUDENT POPUP
+// ===============================
+const addStudentButton = document.getElementById("add-student-button");
+const addStudentModal = document.getElementById("add-student-modal");
+const newStudentName = document.getElementById("new-student-name");
+const newStudentGroup = document.getElementById("new-student-group");
+const newStudentSticker = document.getElementById("new-student-sticker");
+const saveStudentButton = document.getElementById("save-student-button");
+const cancelStudentButton = document.getElementById("cancel-student-button");
+
+addStudentButton.addEventListener("click", () => {
+  addStudentModal.style.display = "block";
+});
+
+cancelStudentButton.addEventListener("click", () => {
+  addStudentModal.style.display = "none";
+  newStudentName.value = "";
+  newStudentGroup.value = "";
+  newStudentSticker.value = 0;
+});
+
+saveStudentButton.addEventListener("click", async () => {
+  const firstname = newStudentName.value.trim();
+  const group = newStudentGroup.value.trim();
+  const sticker = Number(newStudentSticker.value);
+
+  if (!firstname || !group) return;
+
+  await apiPost("/students", {
+    firstname,
+    group,
+    sticker,
+    startDate: new Date().toISOString().split("T")[0]
+  });
+
+  addStudentModal.style.display = "none";
+  newStudentName.value = "";
+  newStudentGroup.value = "";
+  newStudentSticker.value = 0;
+
+  await loadAllData();
+  loadGroups();
 });
 
 // ===============================
