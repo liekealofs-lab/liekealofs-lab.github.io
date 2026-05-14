@@ -50,6 +50,7 @@ let headerTitle, toHome, backButton, addStudentButton;
 let addStudentModal, newStudentName, newStudentGroup, saveStudentButton, cancelStudentButton;
 let editNameButton, editGroupButton, editStickerButton;
 let saveStudentEdit, deleteStudentBtn;
+let fab;
 
 // ======================================================
 // INIT
@@ -89,7 +90,7 @@ function cacheDOM() {
   toHome = document.getElementById("to-home");
   backButton = document.getElementById("back-button");
   addStudentButton = document.getElementById("add-student-button");
-  fab = document.getElementById("fab");
+  
 
   addStudentModal = document.getElementById("add-student-modal");
   newStudentName = document.getElementById("new-student-name");
@@ -106,6 +107,8 @@ function cacheDOM() {
 
   homeSuperspetters = document.getElementById("home-superspetters");
   homeAgenda = document.getElementById("home-agenda");
+
+  fab = document.getElementById("fab");
   
 }
 
@@ -114,24 +117,6 @@ function cacheDOM() {
 // ======================================================
 function attachEvents() {
 
-    // ⬇️ zwevende + knop
-  fab.addEventListener("click", () => {
-    // Als je op de agenda zit → focus op vakantieformulier
-    if (!agendaPage.classList.contains("hidden")) {
-      document.getElementById("vacation-title").scrollIntoView({ behavior: "smooth" });
-      document.getElementById("vacation-title").focus();
-      return;
-    }
-
-    // Anders: zelfde gedrag als "Nieuwe superspetter"
-    if (groupsContainer.classList.contains("hidden") &&
-        studentsContainer.classList.contains("hidden")) {
-      alert("Ga eerst naar een groep of studentenlijst.");
-      return;
-    }
-    addStudentModal.classList.remove("hidden");
-  });
-}
   // Home-tegels
   homeSuperspetters.addEventListener("click", () => {
     showGroups();
@@ -142,9 +127,7 @@ function attachEvents() {
   });
 
   // Header-knoppen
-  toHome.addEventListener("click", () => {
-    showHome();
-  });
+  toHome.addEventListener("click", showHome);
 
   backButton.addEventListener("click", () => {
     if (!studentEdit.classList.contains("hidden")) {
@@ -165,6 +148,23 @@ function attachEvents() {
       alert("Ga eerst naar een groep of studentenlijst.");
       return;
     }
+    addStudentModal.classList.remove("hidden");
+  });
+
+  // FAB
+  fab.addEventListener("click", () => {
+    if (!agendaPage.classList.contains("hidden")) {
+      document.getElementById("vacation-title").scrollIntoView({ behavior: "smooth" });
+      document.getElementById("vacation-title").focus();
+      return;
+    }
+
+    if (groupsContainer.classList.contains("hidden") &&
+        studentsContainer.classList.contains("hidden")) {
+      alert("Ga eerst naar een groep of studentenlijst.");
+      return;
+    }
+
     addStudentModal.classList.remove("hidden");
   });
 
@@ -205,6 +205,7 @@ function attachEvents() {
   // Agenda
   document.getElementById("add-vacation").addEventListener("click", addVacation);
 }
+
 
 // ======================================================
 // VIEW HELPERS
@@ -657,6 +658,4 @@ function showAgenda() {
   agendaPage.classList.remove("hidden");
   loadVacations();
 }
-document.getElementById("fab").addEventListener("click", () => {
-  addStudentModal.classList.remove("hidden");
-});
+
