@@ -233,9 +233,9 @@ saveStudentButton.addEventListener("click", async () => {
 
   if (!firstname) return;
 
-  // Startdatum dd-mm-yyyy
+  // Startdatum in formaat YYYY-MM-DD (vereist door jouw backend)
   const d = new Date();
-  const startDate = `${String(d.getDate()).padStart(2, "0")}-${String(d.getMonth()+1).padStart(2, "0")}-${d.getFullYear()}`;
+  const startDate = d.toISOString().split("T")[0];
 
   await apiPost("/students", {
     firstname,
@@ -251,6 +251,7 @@ saveStudentButton.addEventListener("click", async () => {
   await loadAllData();
   loadGroups();
 });
+
 
 // ===============================
 // NAVIGATION
