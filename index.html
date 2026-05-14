@@ -40,7 +40,6 @@
 
       <h2 id="group-title"></h2>
 
-      <!-- STUDENT TOEVOEGEN KNOP -->
       <button id="add-student-button" class="primary-button">+ Student toevoegen</button>
 
       <div id="students-list"></div>
@@ -89,18 +88,21 @@
     </div>
   </div>
 
-  <script src="app.js"></script>
+  <!-- POPUP: GROEP TOEVOEGEN (VERPLAATST NAAR HIER) -->
   <div id="add-group-modal" class="modal" style="display:none;">
-  <div class="modal-content">
-    <h3>Nieuwe groep</h3>
+    <div class="modal-content">
+      <h3>Nieuwe groep</h3>
 
-    <label>Groepsnaam:</label>
-    <input id="new-group-name" type="text" placeholder="Naam van de groep">
+      <label>Groepsnaam:</label>
+      <input id="new-group-name" type="text" placeholder="Naam van de groep">
 
-    <button id="save-group-button">Opslaan</button>
-    <button id="cancel-group-button">Annuleren</button>
+      <button id="save-group-button">Opslaan</button>
+      <button id="cancel-group-button">Annuleren</button>
+    </div>
   </div>
-</div>
+
+  <!-- SCRIPT MOET ALS LAATSTE -->
+  <script src="app.js"></script>
 
 </body>
 </html>
