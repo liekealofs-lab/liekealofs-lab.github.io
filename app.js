@@ -224,6 +224,9 @@ cancelStudentButton.addEventListener("click", () => {
   newStudentName.value = "";
 });
 
+// ===============================
+// SAVE NEW STUDENT
+// ===============================
 saveStudentButton.addEventListener("click", async () => {
   const firstname = newStudentName.value.trim();
   const group = newStudentGroup.value;
