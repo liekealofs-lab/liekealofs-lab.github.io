@@ -233,17 +233,11 @@ saveStudentButton.addEventListener("click", async () => {
 
   if (!firstname) return;
 
-  // Automatisch ID bepalen
-  const nextId = students.length > 0
-    ? Math.max(...students.map(s => s.id)) + 1
-    : 1;
-
   // Startdatum dd-mm-yyyy
   const d = new Date();
   const startDate = `${String(d.getDate()).padStart(2, "0")}-${String(d.getMonth()+1).padStart(2, "0")}-${d.getFullYear()}`;
 
   await apiPost("/students", {
-    id: nextId,
     firstname,
     group,
     startDate,
