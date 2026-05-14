@@ -1,5 +1,4 @@
-// Mock data - replace with API calls when ready
-const API_BASE = 'https://your-api-url.com/api'; // Replace with actual API URL
+const API_BASE = 'https://zohz.duckdns.org/superspetters';
 
 const scoreOptions = [
   { value: 0, text: 'Niet begonnen', color: '#6b7280', symbol: '⛔' },
@@ -8,96 +7,63 @@ const scoreOptions = [
   { value: 3, text: 'Beheerst', color: '#16a34a', symbol: '✅' }
 ];
 
-let students = [
-  { id: 1, firstname: 'Jan', group: 'Waterfestijn', startDate: '2023-01-01', sticker: 5, note: '' },
-  { id: 2, firstname: 'Piet', group: 'Waterfestijn', startDate: '2023-01-01', sticker: 3, note: '' },
-  { id: 3, firstname: 'Klaas', group: 'Beginners', startDate: '2023-01-01', sticker: 4, note: '' },
-  { id: 4, firstname: 'Marie', group: 'Beginners', startDate: '2023-02-01', sticker: 6, note: '' },
-  { id: 5, firstname: 'Anna', group: 'Basis', startDate: '2023-03-01', sticker: 2, note: '' },
-  { id: 6, firstname: 'Tom', group: 'Basis', startDate: '2023-03-01', sticker: 7, note: '' },
-];
+let students = [];
+let skills = [];
+let progress = [];
 
-let skills = [
-  { id: 1, order: 1, title: 'Lezen', category: 'Basis' },
-  { id: 2, order: 2, title: 'Schrijven', category: 'Basis' },
-  { id: 3, order: 3, title: 'Rekenen', category: 'Basis' },
-  { id: 4, order: 4, title: 'Tellen', category: 'Basis' },
-  { id: 5, order: 5, title: 'Woordenschat', category: 'Taal' },
-  { id: 6, order: 6, title: 'Zinnen maken', category: 'Taal' },
-  { id: 7, order: 7, title: 'Verhaal begrijpen', category: 'Taal' },
-  { id: 8, order: 8, title: 'Optellen', category: 'Rekenen' },
-  { id: 9, order: 9, title: 'Aftrekken', category: 'Rekenen' },
-  { id: 10, order: 10, title: 'Vermenigvuldigen', category: 'Geavanceerd' },
-];
+// API helper functions
+async function fetchData(endpoint) {
+  try {
+    const response = await fetch(`${API_BASE}${endpoint}`);
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    return await response.json();
+  } catch (error) {
+    console.error(`Failed to fetch ${endpoint}:`, error);
+    return null;
+  }
+}
 
-let progress = [
-  // Student 1
-  { studentId: 1, skillId: 1, score: 3, note: 'Goed' },
-  { studentId: 1, skillId: 2, score: 2, note: '' },
-  { studentId: 1, skillId: 3, score: 3, note: 'Uitstekend' },
-  { studentId: 1, skillId: 4, score: 3, note: '' },
-  { studentId: 1, skillId: 5, score: 2, note: 'Bijna' },
-  { studentId: 1, skillId: 6, score: 1, note: '' },
-  { studentId: 1, skillId: 7, score: 3, note: '' },
-  { studentId: 1, skillId: 8, score: 3, note: '' },
-  { studentId: 1, skillId: 9, score: 2, note: '' },
-  { studentId: 1, skillId: 10, score: 0, note: '' },
-  // Student 2
-  { studentId: 2, skillId: 1, score: 1, note: '' },
-  { studentId: 2, skillId: 2, score: 0, note: '' },
-  { studentId: 2, skillId: 3, score: 2, note: '' },
-  { studentId: 2, skillId: 4, score: 2, note: '' },
-  { studentId: 2, skillId: 5, score: 1, note: '' },
-  { studentId: 2, skillId: 6, score: 0, note: '' },
-  { studentId: 2, skillId: 7, score: 1, note: '' },
-  { studentId: 2, skillId: 8, score: 2, note: '' },
-  { studentId: 2, skillId: 9, score: 1, note: '' },
-  { studentId: 2, skillId: 10, score: 0, note: '' },
-  // Student 3
-  { studentId: 3, skillId: 1, score: 3, note: '' },
-  { studentId: 3, skillId: 2, score: 3, note: '' },
-  { studentId: 3, skillId: 3, score: 3, note: '' },
-  { studentId: 3, skillId: 4, score: 3, note: '' },
-  { studentId: 3, skillId: 5, score: 3, note: '' },
-  { studentId: 3, skillId: 6, score: 3, note: '' },
-  { studentId: 3, skillId: 7, score: 3, note: '' },
-  { studentId: 3, skillId: 8, score: 3, note: '' },
-  { studentId: 3, skillId: 9, score: 3, note: '' },
-  { studentId: 3, skillId: 10, score: 2, note: '' },
-  // Student 4
-  { studentId: 4, skillId: 1, score: 3, note: 'Zeer goed' },
-  { studentId: 4, skillId: 2, score: 3, note: '' },
-  { studentId: 4, skillId: 3, score: 3, note: '' },
-  { studentId: 4, skillId: 4, score: 3, note: '' },
-  { studentId: 4, skillId: 5, score: 3, note: '' },
-  { studentId: 4, skillId: 6, score: 3, note: '' },
-  { studentId: 4, skillId: 7, score: 3, note: '' },
-  { studentId: 4, skillId: 8, score: 3, note: '' },
-  { studentId: 4, skillId: 9, score: 3, note: '' },
-  { studentId: 4, skillId: 10, score: 3, note: 'Top!' },
-  // Student 5
-  { studentId: 5, skillId: 1, score: 0, note: '' },
-  { studentId: 5, skillId: 2, score: 0, note: '' },
-  { studentId: 5, skillId: 3, score: 1, note: '' },
-  { studentId: 5, skillId: 4, score: 1, note: '' },
-  { studentId: 5, skillId: 5, score: 0, note: '' },
-  { studentId: 5, skillId: 6, score: 0, note: '' },
-  { studentId: 5, skillId: 7, score: 0, note: '' },
-  { studentId: 5, skillId: 8, score: 1, note: '' },
-  { studentId: 5, skillId: 9, score: 0, note: '' },
-  { studentId: 5, skillId: 10, score: 0, note: '' },
-  // Student 6
-  { studentId: 6, skillId: 1, score: 3, note: '' },
-  { studentId: 6, skillId: 2, score: 3, note: '' },
-  { studentId: 6, skillId: 3, score: 3, note: '' },
-  { studentId: 6, skillId: 4, score: 3, note: '' },
-  { studentId: 6, skillId: 5, score: 3, note: '' },
-  { studentId: 6, skillId: 6, score: 3, note: '' },
-  { studentId: 6, skillId: 7, score: 3, note: '' },
-  { studentId: 6, skillId: 8, score: 3, note: '' },
-  { studentId: 6, skillId: 9, score: 3, note: '' },
-  { studentId: 6, skillId: 10, score: 3, note: '' },
-];
+async function updateProgress(studentId, skillId, score, note) {
+  try {
+    const response = await fetch(`${API_BASE}/progress/${studentId}/${skillId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ score, note })
+    });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    return await response.json();
+  } catch (error) {
+    console.error('Failed to update progress:', error);
+    return null;
+  }
+}
+
+async function updateStudent(studentId, updates) {
+  try {
+    const response = await fetch(`${API_BASE}/students/${studentId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(updates)
+    });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    return await response.json();
+  } catch (error) {
+    console.error('Failed to update student:', error);
+    return null;
+  }
+}
+
+async function loadAllData() {
+  const [studentsData, progressData] = await Promise.all([
+    fetchData('/students'),
+    fetchData('/progress')
+  ]);
+  
+  if (studentsData) students = studentsData;
+  if (progressData) progress = progressData;
+  
+  return { students, progress };
+}
 
 // DOM elements
 const groupsContainer = document.getElementById('groups-container');
@@ -123,28 +89,10 @@ const navStudents = document.getElementById('nav-students');
 let currentGroup = '';
 let currentStudent = null;
 
-const LOCAL_STORAGE_KEY = 'studentProgressWebAppData';
 const groupOrder = ['waterfestijn', 'beginners', 'basis', 'gevorderd'];
 
-function loadSavedState() {
-  const stored = localStorage.getItem(LOCAL_STORAGE_KEY);
-  if (!stored) return;
-
-  try {
-    const parsed = JSON.parse(stored);
-    if (parsed.students && Array.isArray(parsed.students) && parsed.students.length > 0) {
-      students = parsed.students;
-    }
-    if (parsed.progress && Array.isArray(parsed.progress)) {
-      progress = parsed.progress;
-    }
-  } catch (err) {
-    console.error('Kon opgeslagen gegevens niet lezen:', err);
-  }
-}
-
-function saveState() {
-  localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify({ students, progress }));
+function saveProgress(studentId, skillId, score, note) {
+  updateProgress(studentId, skillId, score, note);
 }
 
 function getGroupStats(group) {
@@ -202,25 +150,30 @@ groupEditButton.addEventListener('click', () => {
   groupSelect.focus();
 });
 
-groupSelect.addEventListener('change', () => {
+groupSelect.addEventListener('change', async () => {
   if (!currentStudent) return;
-  currentStudent.group = groupSelect.value;
-  groupValue.textContent = groupSelect.value;
-  groupValue.style.display = 'inline';
-  groupSelect.style.display = 'none';
-  saveState();
+  const newGroup = groupSelect.value;
+  const updated = await updateStudent(currentStudent.id, { group: newGroup });
+  if (updated) {
+    currentStudent.group = newGroup;
+    groupValue.textContent = newGroup;
+    groupValue.style.display = 'inline';
+    groupSelect.style.display = 'none';
+  }
 });
 
-stickerInput.addEventListener('change', () => {
+stickerInput.addEventListener('change', async () => {
   if (!currentStudent) return;
-  currentStudent.sticker = parseInt(stickerInput.value);
-  saveState();
+  const newSticker = parseInt(stickerInput.value);
+  const updated = await updateStudent(currentStudent.id, { sticker: newSticker });
+  if (updated) {
+    currentStudent.sticker = newSticker;
+  }
 });
 
-// Load data on page load
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   console.log('DOMContentLoaded event fired');
-  loadSavedState();
+  await loadAllData();
   studentSearch.value = '';
   console.log('About to load groups. Students:', students.length);
   loadGroups();
