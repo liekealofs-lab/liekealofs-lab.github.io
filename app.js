@@ -283,3 +283,34 @@ backToGroups.addEventListener("click", loadGroups);
 backToStudents.addEventListener("click", () => showStudents(currentGroup));
 navGroups.addEventListener("click", loadGroups);
 navStudents.addEventListener("click", () => showStudents(currentGroup));
+// ===============================
+// ADD GROUP POPUP
+// ===============================
+const addGroupButton = document.getElementById("add-group-button");
+const addGroupModal = document.getElementById("add-group-modal");
+const newGroupName = document.getElementById("new-group-name");
+const saveGroupButton = document.getElementById("save-group-button");
+const cancelGroupButton = document.getElementById("cancel-group-button");
+
+addGroupButton.addEventListener("click", () => {
+  addGroupModal.style.display = "block";
+});
+
+cancelGroupButton.addEventListener("click", () => {
+  addGroupModal.style.display = "none";
+  newGroupName.value = "";
+});
+
+saveGroupButton.addEventListener("click", async () => {
+  const name = newGroupName.value.trim();
+  if (!name) return;
+
+  // Backend moet een /groups endpoint hebben
+  await apiPost("/groups", { name });
+
+  addGroupModal.style.display = "none";
+  newGroupName.value = "";
+
+  await loadAllData();
+  loadGroups();
+});

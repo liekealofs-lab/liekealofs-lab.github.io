@@ -28,6 +28,7 @@
     <!-- GROEPEN -->
     <div id="groups-container">
       <h2>Groepen</h2>
+      <button id="add-group-button" class="primary-button">+ Groep toevoegen</button>
       <div id="groups-list"></div>
     </div>
 
@@ -89,5 +90,17 @@
   </div>
 
   <script src="app.js"></script>
+  <div id="add-group-modal" class="modal" style="display:none;">
+  <div class="modal-content">
+    <h3>Nieuwe groep</h3>
+
+    <label>Groepsnaam:</label>
+    <input id="new-group-name" type="text" placeholder="Naam van de groep">
+
+    <button id="save-group-button">Opslaan</button>
+    <button id="cancel-group-button">Annuleren</button>
+  </div>
+</div>
+
 </body>
 </html>
