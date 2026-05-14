@@ -47,15 +47,11 @@ const groupsList = document.getElementById('groups-list');
 const studentsList = document.getElementById('students-list');
 const groupTitle = document.getElementById('group-title');
 const studentName = document.getElementById('student-name');
-const groupSelect = document.getElementById('group');
 const groupValue = document.getElementById('group-value');
-const groupEditButton = document.getElementById('group-edit-button');
 const stickerInput = document.getElementById('sticker');
 const skillsList = document.getElementById('skills-list');
 const backToGroups = document.getElementById('back-to-groups');
 const backToStudents = document.getElementById('back-to-students');
-const navGroups = document.getElementById('nav-groups');
-const navStudents = document.getElementById('nav-students');
 
 // ===============================
 // INIT
@@ -66,7 +62,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
 
 // ===============================
-// LOAD DATA FROM API
+// LOAD DATA
 // ===============================
 async function loadAllData() {
   students = await apiGet("/students");
@@ -81,7 +77,6 @@ function getGroups() {
 }
 
 function loadGroups() {
-  currentGroup = "";
   groupsList.innerHTML = "";
 
   const groups = getGroups();
@@ -93,7 +88,7 @@ function loadGroups() {
     div.className = "group-button";
     div.innerHTML = `
       <div class="group-button-title">${group}</div>
-      <div class="group-meta"><span>${count} studenten</span></div>
+      <div class="group-meta">${count} studenten</div>
     `;
     div.addEventListener("click", () => showStudents(group));
     groupsList.appendChild(div);
@@ -125,11 +120,11 @@ async function showStudents(group) {
     const card = document.createElement("div");
     card.className = "student-card";
     card.innerHTML = `
-      <div class="student-card-title">${student.firstname} <span class="student-card-extra">Sticker ${student.sticker}</span></div>
+      <div class="student-card-title">${student.firstname}</div>
       <div class="progress-bar-outer">
         <div class="progress-bar-inner" style="width:${avg}%;"></div>
       </div>
-      <div class="progress-label">${avg}% voortgang</div>
+      <div class="progress-label">${avg}%</div>
     `;
     card.addEventListener("click", () => editStudent(student));
     studentsList.appendChild(card);
@@ -145,13 +140,11 @@ async function showStudents(group) {
 // ===============================
 async function editStudent(student) {
   currentStudent = student;
-  studentName.textContent = `Bewerk ${student.firstname}`;
-
+  studentName.textContent = student.firstname;
   groupValue.textContent = student.group;
   stickerInput.value = student.sticker;
 
   const studentProgress = await apiGet(`/progress/${student.id}`);
-
   renderSkills(studentProgress);
 
   studentsContainer.style.display = "none";
@@ -213,34 +206,12 @@ async function saveProgress(studentId, skillId, score, note) {
 }
 
 // ===============================
-// SAVE STUDENT
-// ===============================
-groupEditButton.addEventListener("click", () => {
-  groupValue.style.display = "none";
-  groupSelect.style.display = "inline-block";
-});
-
-groupSelect.addEventListener("change", async () => {
-  await apiPatch(`/students/${currentStudent.id}`, { group: groupSelect.value });
-  currentStudent.group = groupSelect.value;
-  groupValue.textContent = groupSelect.value;
-  groupValue.style.display = "inline";
-  groupSelect.style.display = "none";
-});
-
-stickerInput.addEventListener("change", async () => {
-  await apiPatch(`/students/${currentStudent.id}`, { sticker: Number(stickerInput.value) });
-  currentStudent.sticker = Number(stickerInput.value);
-});
-
-// ===============================
 // ADD STUDENT POPUP
 // ===============================
 const addStudentButton = document.getElementById("add-student-button");
 const addStudentModal = document.getElementById("add-student-modal");
 const newStudentName = document.getElementById("new-student-name");
 const newStudentGroup = document.getElementById("new-student-group");
-const newStudentSticker = document.getElementById("new-student-sticker");
 const saveStudentButton = document.getElementById("save-student-button");
 const cancelStudentButton = document.getElementById("cancel-student-button");
 
@@ -251,29 +222,34 @@ addStudentButton.addEventListener("click", () => {
 cancelStudentButton.addEventListener("click", () => {
   addStudentModal.style.display = "none";
   newStudentName.value = "";
-  newStudentGroup.value = "";
-  newStudentSticker.value = 0;
 });
 
 saveStudentButton.addEventListener("click", async () => {
   const firstname = newStudentName.value.trim();
-  const group = newStudentGroup.value.trim();
-  const sticker = Number(newStudentSticker.value);
+  const group = newStudentGroup.value;
 
-  if (!firstname || !group) return;
+  if (!firstname) return;
+
+  // Automatisch ID bepalen
+  const nextId = students.length > 0
+    ? Math.max(...students.map(s => s.id)) + 1
+    : 1;
+
+  // Startdatum dd-mm-yyyy
+  const d = new Date();
+  const startDate = `${String(d.getDate()).padStart(2, "0")}-${String(d.getMonth()+1).padStart(2, "0")}-${d.getFullYear()}`;
 
   await apiPost("/students", {
+    id: nextId,
     firstname,
     group,
-    sticker,
-    startDate: new Date().toISOString().split("T")[0],
+    startDate,
+    sticker: 0,
     note: ""
   });
 
   addStudentModal.style.display = "none";
   newStudentName.value = "";
-  newStudentGroup.value = "";
-  newStudentSticker.value = 0;
 
   await loadAllData();
   loadGroups();
@@ -284,7 +260,3 @@ saveStudentButton.addEventListener("click", async () => {
 // ===============================
 backToGroups.addEventListener("click", loadGroups);
 backToStudents.addEventListener("click", () => showStudents(currentGroup));
-navGroups.addEventListener("click", loadGroups);
-navStudents.addEventListener("click", () => {
-  if (currentGroup) showStudents(currentGroup);
-});

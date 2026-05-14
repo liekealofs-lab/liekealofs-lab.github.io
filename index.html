@@ -8,8 +8,7 @@
 </head>
 <body>
   <header>
-    <h1>Welcome to My Website</h1>
-    <p>A simple starting page for your project.</p>
+    <h1>Studentenoverzicht</h1>
   </header>
 
   <nav class="mobile-nav">
@@ -18,13 +17,6 @@
   </nav>
 
   <main>
-    <div class="search-toolbar">
-      <label class="search-wrap">
-        <input id="student-search" type="search" placeholder="Zoek student...">
-        <span class="search-hint">Sorteer standaard op sticker</span>
-      </label>
-    </div>
-
     <!-- GROEPEN -->
     <div id="groups-container">
       <h2>Groepen</h2>
@@ -32,36 +24,26 @@
     </div>
 
     <!-- STUDENTEN -->
-    <div id="students-container" style="display: none;">
-      <div class="back-button-wrap">
-        <button id="back-to-groups" class="secondary-button">← Terug naar Groepen</button>
-      </div>
-
+    <div id="students-container" style="display:none;">
+      <button id="back-to-groups" class="secondary-button">← Terug</button>
       <h2 id="group-title"></h2>
 
-      <!-- STUDENT TOEVOEGEN KNOP -->
       <button id="add-student-button" class="primary-button">+ Student toevoegen</button>
 
       <div id="students-list"></div>
     </div>
 
     <!-- STUDENT BEWERKEN -->
-    <div id="student-edit" style="display: none;">
-      <button id="back-to-students">Terug naar Studenten</button>
+    <div id="student-edit" style="display:none;">
+      <button id="back-to-students">← Terug</button>
       <h2 id="student-name"></h2>
 
       <form id="student-form">
-        <div class="group-edit-row">
-          <label for="group">Groep:</label>
-          <div id="group-display" class="group-display">
-            <span id="group-value"></span>
-            <button type="button" id="group-edit-button" class="icon-button" aria-label="Wijzig groep">✏️</button>
-          </div>
-          <select id="group" name="group" style="display: none;"></select>
-        </div>
+        <label>Groep:</label>
+        <span id="group-value"></span>
 
-        <label for="sticker">Sticker:</label>
-        <input type="number" id="sticker" name="sticker"><br>
+        <label>Sticker:</label>
+        <input type="number" id="sticker">
 
         <h3>Vaardigheden</h3>
         <div id="skills-list"></div>
@@ -75,13 +57,15 @@
       <h3>Nieuwe student</h3>
 
       <label>Voornaam:</label>
-      <input id="new-student-name" type="text" placeholder="Voornaam">
+      <input id="new-student-name" type="text">
 
       <label>Groep:</label>
-      <input id="new-student-group" type="text" placeholder="Groepnaam">
-
-      <label>Sticker:</label>
-      <input id="new-student-sticker" type="number" value="0">
+      <select id="new-student-group">
+        <option value="MiniSpetters">MiniSpetters</option>
+        <option value="Beginners">Beginners</option>
+        <option value="Gevorderden">Gevorderden</option>
+        <option value="Uitblinkers">Uitblinkers</option>
+      </select>
 
       <button id="save-student-button">Opslaan</button>
       <button id="cancel-student-button">Annuleren</button>
