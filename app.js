@@ -636,3 +636,6 @@ function showAgenda() {
   agendaPage.classList.remove("hidden");
   loadVacations();
 }
+document.getElementById("fab").addEventListener("click", () => {
+  addStudentModal.classList.remove("hidden");
+});
