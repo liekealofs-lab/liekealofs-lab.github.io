@@ -9,25 +9,39 @@ async function apiGet(path) {
   return res.json();
 }
 
+
 async function apiPost(path, body) {
-  const res = await fetch(`${API_BASE}${path}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body)
-  });
-  if (!res.ok) throw new Error(`POST ${path} failed`);
-  return res.json();
+    const res = await fetch(`${API_BASE}${path}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body)
+    });
+
+    if (!res.ok) {
+        const message = await res.text();
+        throw new Error(`POST ${path}: ${res.status} - ${message}`);
+    }
+
+    return res.json();
 }
 
+
+
 async function apiPatch(path, body) {
-  const res = await fetch(`${API_BASE}${path}`, {
-    method: "PATCH",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body)
-  });
-  if (!res.ok) throw new Error(`PATCH ${path} failed`);
-  return res.json();
+    const res = await fetch(`${API_BASE}${path}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body)
+    });
+
+    if (!res.ok) {
+        const message = await res.text();
+        throw new Error(`PATCH ${path}: ${res.status} - ${message}`);
+    }
+
+    return res.json();
 }
+
 
 // ======================================================
 // DATA
@@ -257,24 +271,33 @@ async function loadAllData() {
 // GROUPS
 // ======================================================
 function loadGroups() {
-  groupsList.innerHTML = "";
+    groupsList.innerHTML = "";
 
-  const order = ["MiniSpetters", "Beginners", "Gevorderden", "Uitblinkers"];
-  let groups = [...new Set(students.map(s => s.group))];
-  groups.sort((a, b) => order.indexOf(a) - order.indexOf(b));
+    const groups = [
+        "Spetter Festijn",
+        "Spetter Start",
+        "Super Spetters"
+    ];
 
-  groups.forEach(group => {
-    const count = students.filter(s => s.group === group).length;
+    groups.forEach(group => {
+        const count = students.filter(
+            student => student.group === group
+        ).length;
 
-    const btn = document.createElement("button");
-    btn.className = "group-button";
-    btn.innerHTML = `
-      <div class="group-button-title">${group}</div>
-      <div class="group-meta"><span>${count} superspetters</span></div>
-    `;
-    btn.addEventListener("click", () => showStudents(group));
-    groupsList.appendChild(btn);
-  });
+        const btn = document.createElement("button");
+        btn.className = "group-button";
+
+        btn.innerHTML = `
+            <div class="group-button-title">${group}</div>
+            <div class="group-meta">
+                <span>${count} superspetters</span>
+            </div>
+        `;
+
+        btn.addEventListener("click", () => showStudents(group));
+
+        groupsList.appendChild(btn);
+    });
 }
 
 // ======================================================
@@ -459,39 +482,69 @@ async function saveProgress(studentId, skillId, score, note) {
 // ======================================================
 // NEW STUDENT
 // ======================================================
+
 async function saveNewStudent() {
-  const firstname = newStudentName.value.trim();
-  const group = currentGroup || newStudentGroup.value;
+    const firstname = newStudentName.value.trim();
+    const group = currentGroup || newStudentGroup.value;
 
-  if (!firstname) return alert("Vul een naam in.");
+    if (!firstname) {
+        alert("Vul een naam in.");
+        return;
+    }
 
-  const startDate = new Date().toISOString().split("T")[0];
+    if (!group) {
+        alert("Selecteer eerst een groep.");
+        return;
+    }
 
-  const newStudent = await apiPost("/students", {
-    firstname,
-    group,
-    startDate,
-    sticker: 0,
-    note: ""
-  });
+    saveStudentButton.disabled = true;
+    saveStudentButton.textContent = "Opslaan...";
 
-  for (const skill of skills) {
-    await apiPatch(`/progress/${newStudent.id}/${skill.id}`, {
-      score: 0,
-      note: ""
-    });
-  }
+    try {
+        const startDate = new Date().toISOString().split("T")[0];
 
-  addStudentModal.classList.add("hidden");
-  newStudentName.value = "";
+        const newStudent = await apiPost("/students", {
+            firstname,
+            group,
+            startDate,
+            sticker: 0,
+            note: ""
+        });
 
-  await loadAllData();
-  if (currentGroup) {
-    showStudents(currentGroup);
-  } else {
-    showGroups();
-  }
+        if (!newStudent || !newStudent.id) {
+            throw new Error("De server heeft geen leerling-ID teruggegeven.");
+        }
+
+        for (const skill of skills) {
+            await apiPatch(`/progress/${newStudent.id}/${skill.id}`, {
+                score: 0,
+                note: ""
+            });
+        }
+
+        alert("Leerling succesvol toegevoegd!");
+
+        addStudentModal.classList.add("hidden");
+        newStudentName.value = "";
+
+        await loadAllData();
+
+        if (currentGroup) {
+            showStudents(currentGroup);
+        } else {
+            showGroups();
+        }
+
+    } catch (error) {
+        console.error("Fout bij toevoegen leerling:", error);
+        alert("Leerling opslaan is niet gelukt: " + error.message);
+
+    } finally {
+        saveStudentButton.disabled = false;
+        saveStudentButton.textContent = "Opslaan";
+    }
 }
+
 
 // ======================================================
 // STICKER
