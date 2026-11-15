@@ -53,6 +53,49 @@ let currentStudent = null;
 let vacations = [];
 
 // ======================================================
+// STICKERS
+// ======================================================
+
+const STICKERS = [
+  { id: 1, title: "Eerste zwemles", icon: "🏊" },
+  { id: 2, title: "In het water springen", icon: "💦" },
+  { id: 3, title: "Ademhalen", icon: "🌬️" },
+  { id: 4, title: "Drijven", icon: "⭐" },
+  { id: 5, title: "Trappelbenen", icon: "🦵" },
+  { id: 6, title: "Onder water zwemmen", icon: "🐠" },
+  { id: 7, title: "Duiken", icon: "🤿" },
+  { id: 8, title: "Rugcrawl en borstcrawl", icon: "🏅" },
+  { id: 9, title: "Enkelvoudige rugslag", icon: "🏊‍♂️" },
+  { id: 10, title: "Door het zeil & wak zwemmen", icon: "🌊" },
+  { id: 11, title: "Borstcrawl met ademhalen", icon: "🐬" },
+  { id: 12, title: "Schoolslag", icon: "🏆" },
+  { id: 13, title: "Met kleding zwemmen", icon: "👕" },
+  { id: 14, title: "Afzwemmen", icon: "🥇" }
+];
+
+function getStickerStorageKey() {
+  return `superspetters_stickers_${currentStudent.id}`;
+}
+
+function getStudentStickers() {
+  let saved = {};
+
+  try {
+    saved = JSON.parse(localStorage.getItem(getStickerStorageKey())) || {};
+  } catch (error) {
+    console.error("Stickergegevens konden niet worden gelezen:", error);
+  }
+
+  return saved;
+}
+
+function saveStudentStickers(stickers) {
+  localStorage.setItem(
+    getStickerStorageKey(),
+    JSON.stringify(stickers)
+  );
+}
+// ======================================================
 // DOM VARS
 // ======================================================
 let homePage, groupsContainer, studentsContainer, studentEdit, agendaPage;
@@ -65,6 +108,13 @@ let addStudentModal, newStudentName, newStudentGroup, saveStudentButton, cancelS
 let editNameButton, editGroupButton, editStickerButton;
 let saveStudentEdit, deleteStudentBtn;
 let fab;
+let stickerbookPage;
+let stickerbookGrid;
+let stickerbookTitle;
+let stickerbookCount;
+let stickerbookPercentage;
+let stickerbookProgressInner;
+let openStickerbookButton;
 
 // ======================================================
 // INIT
@@ -123,7 +173,13 @@ function cacheDOM() {
   homeAgenda = document.getElementById("home-agenda");
 
   fab = document.getElementById("fab");
-  
+  stickerbookPage = document.getElementById("stickerbook-page");
+stickerbookGrid = document.getElementById("stickerbook-grid");
+stickerbookTitle = document.getElementById("stickerbook-title");
+stickerbookCount = document.getElementById("stickerbook-count");
+stickerbookPercentage = document.getElementById("stickerbook-percentage");
+stickerbookProgressInner = document.getElementById("stickerbook-progress-inner");
+openStickerbookButton = document.getElementById("open-stickerbook-button");
 }
 
 // ======================================================
@@ -143,17 +199,19 @@ function attachEvents() {
   // Header-knoppen
   toHome.addEventListener("click", showHome);
 
-  backButton.addEventListener("click", () => {
-    if (!studentEdit.classList.contains("hidden")) {
-      showStudents(currentGroup);
-    } else if (!studentsContainer.classList.contains("hidden")) {
-      showGroups();
-    } else if (!agendaPage.classList.contains("hidden")) {
-      showHome();
-    } else {
-      showHome();
-    }
-  });
+backButton.addEventListener("click", () => {
+  if (!stickerbookPage.classList.contains("hidden")) {
+    showStudentDetail();
+  } else if (!studentEdit.classList.contains("hidden")) {
+    showStudents(currentGroup);
+  } else if (!studentsContainer.classList.contains("hidden")) {
+    showGroups();
+  } else if (!agendaPage.classList.contains("hidden")) {
+    showHome();
+  } else {
+    showHome();
+  }
+});
 
   // Nieuwe student (header-knop opent modal)
   addStudentButton.addEventListener("click", () => {
@@ -213,6 +271,8 @@ function attachEvents() {
   saveStudentEdit.addEventListener("click", saveStudent);
   deleteStudentBtn.addEventListener("click", deleteStudent);
 
+  openStickerbookButton.addEventListener("click", showStickerbook);
+
   // Zoeken
   studentSearch.addEventListener("input", filterStudents);
 
@@ -230,6 +290,7 @@ function hideAll() {
   studentsContainer.classList.add("hidden");
   studentEdit.classList.add("hidden");
   agendaPage.classList.add("hidden");
+  stickerbookPage.classList.add("hidden");
 }
 
 function showHome() {
@@ -702,6 +763,85 @@ async function deleteVacation(id) {
   } catch (err) {
     console.error("Fout bij verwijderen vakantie:", err);
   }
+}
+
+// ======================================================
+// STICKERBOEK
+// ======================================================
+
+function showStudentDetail() {
+  hideAll();
+
+  studentEdit.classList.remove("hidden");
+  headerTitle.textContent = currentStudent.firstname;
+}
+
+function showStickerbook() {
+  if (!currentStudent) return;
+
+  hideAll();
+
+  stickerbookPage.classList.remove("hidden");
+  headerTitle.textContent = "Stickerboek";
+  stickerbookTitle.textContent =
+    `Stickerboek van ${currentStudent.firstname}`;
+
+  renderStickerbook();
+}
+
+function renderStickerbook() {
+  const savedStickers = getStudentStickers();
+
+  const achievedCount = STICKERS.filter(
+    sticker => savedStickers[sticker.id] === true
+  ).length;
+
+  const percentage = Math.round(
+    (achievedCount / STICKERS.length) * 100
+  );
+
+  stickerbookCount.textContent =
+    `${achievedCount} van ${STICKERS.length} stickers behaald`;
+
+  stickerbookPercentage.textContent = `${percentage}%`;
+
+  stickerbookProgressInner.style.width = `${percentage}%`;
+
+  stickerbookGrid.innerHTML = "";
+
+  STICKERS.forEach(sticker => {
+    const achieved = savedStickers[sticker.id] === true;
+
+    const card = document.createElement("button");
+    card.type = "button";
+    card.className = `sticker-card ${achieved ? "achieved" : "locked"}`;
+
+    card.innerHTML = `
+      <div class="sticker-image">${sticker.icon}</div>
+      <div class="sticker-number">Sticker ${sticker.id}</div>
+      <div class="sticker-name">${sticker.title}</div>
+      <div class="sticker-status">
+        ${achieved ? "✅ Behaald" : "🔒 Nog niet behaald"}
+      </div>
+    `;
+
+    card.addEventListener("click", () => {
+      toggleSticker(sticker.id);
+    });
+
+    stickerbookGrid.appendChild(card);
+  });
+}
+
+function toggleSticker(stickerId) {
+  const savedStickers = getStudentStickers();
+
+  savedStickers[stickerId] =
+    savedStickers[stickerId] !== true;
+
+  saveStudentStickers(savedStickers);
+
+  renderStickerbook();
 }
 
 // Agenda tonen
