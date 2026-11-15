@@ -55,29 +55,38 @@
 
   <!-- 🧾 STUDENT DETAIL -->
   <section id="student-edit" class="hidden">
-    <div class="student-header-card">
-      <div class="student-header-left">
-        <div class="student-name-row">
-          <h2 id="student-name">Naam leerling</h2>
-          <button id="edit-name-button" class="btn-icon edit-icon">✏️</button>
-        </div>
+    
+<div class="student-header-card">
 
-        <div class="student-group-row">
-          <span id="student-group-badge" class="group-badge">Groep X</span>
-          <button id="edit-group-button" class="btn-icon edit-icon">✏️</button>
-        </div>
-      </div>
-      <button id="open-stickerbook-button" class="btn btn-primary">
-      📘 Mijn stickerboek
-    </button>
-
-      <div class="student-header-right">
-        <div class="sticker-wrapper">
-          <span id="student-sticker" class="sticker-circle">0</span>
-          <button id="edit-sticker-button" class="btn-icon">✏️</button>
-        </div>
-      </div>
+  <div class="student-header-left">
+    <div class="student-name-row">
+      <h2 id="student-name">Naam leerling</h2>
+      <button id="edit-name-button" class="btn-icon edit-icon">✏️</button>
     </div>
+
+    <div class="student-group-row">
+      <span id="student-group-badge" class="group-badge">Groep X</span>
+      <button id="edit-group-button" class="btn-icon edit-icon">✏️</button>
+    </div>
+  </div>
+
+  <button id="open-stickerbook-button" class="stickerbook-button">
+    <span class="stickerbook-button-icon">📘</span>
+    <span>
+      <strong>Stickerboek</strong>
+      <small>Bekijk alle 14 stickers</small>
+    </span>
+    <span class="stickerbook-arrow">›</span>
+  </button>
+
+  <div class="student-sticker-count">
+    <span id="student-sticker" class="sticker-circle">0/14</span>
+    <span class="sticker-count-label">Stickers behaald</span>
+    <button id="edit-sticker-button" class="btn-icon hidden">✏️</button>
+  </div>
+
+</div>
+
 
     <form id="student-form" class="student-form-card hidden">
       <div class="form-row">
