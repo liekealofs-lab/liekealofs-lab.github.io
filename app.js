@@ -429,6 +429,7 @@ async function showStudents(group) {
 // VAARDIGHEDENOVERZICHT PER GROEP
 // ======================================================
 
+
 async function showGroupSkillsOverview() {
     studentsList.classList.add("hidden");
     groupSkillsOverview.classList.remove("hidden");
@@ -439,28 +440,27 @@ async function showGroupSkillsOverview() {
         .sort((a, b) => a.firstname.localeCompare(b.firstname));
 
     try {
-        // Voortgang van alle kinderen ophalen
+        // Voortgang van alle leerlingen ophalen
         const progressResults = await Promise.all(
-            groupStudents.map(async student => ({
-                student,
-                progress: await apiGet(`/skill_progress/${student.id}`)
-            }))
+            groupStudents.map(async student => {
+                try {
+                    const progress = await apiGet(
+                        `/skill_progress/${student.id}`
+                    );
+
+                    return { student, progress };
+                } catch (error) {
+                    console.error(
+                        `Voortgang ophalen mislukt voor ${student.firstname}:`,
+                        error
+                    );
+
+                    return { student, progress: [] };
+                }
+            })
         );
 
         groupSkillsOverview.innerHTML = "";
-
-        // Vaardigheden indelen per categorie
-        const categories = {};
-
-        skills.forEach(skill => {
-            const category = skill.category || "Overige vaardigheden";
-
-            if (!categories[category]) {
-                categories[category] = [];
-            }
-
-            categories[category].push(skill);
-        });
 
         const heading = document.createElement("h3");
         heading.textContent = "Vaardigheden van " + currentGroup;
@@ -469,136 +469,256 @@ async function showGroupSkillsOverview() {
         const explanation = document.createElement("p");
         explanation.className = "overview-explanation";
         explanation.textContent =
-            "Klik op een score om deze direct aan te passen.";
+            "Open een sticker om de vaardigheden te bekijken. Klik op een score om deze aan te passen.";
         groupSkillsOverview.appendChild(explanation);
 
-        Object.entries(categories).forEach(([category, categorySkills]) => {
-            const details = document.createElement("details");
-            details.className = "overview-category";
+        // Vaardigheden groeperen per sticker
+        const stickerGroups = {};
 
-            const summary = document.createElement("summary");
-            summary.textContent =
-                `${category} (${categorySkills.length} vaardigheden)`;
+        skills.forEach(skill => {
+            const stickerId = Number(skill.stickerId);
 
-            details.appendChild(summary);
+            const stickerKey = Number.isFinite(stickerId)
+                ? stickerId
+                : 0;
 
-            const tableWrapper = document.createElement("div");
-            tableWrapper.className = "overview-table-wrapper";
+            if (!stickerGroups[stickerKey]) {
+                stickerGroups[stickerKey] = {
+                    id: stickerKey,
+                    title: skill.stickerName || "Niet gekoppeld",
+                    skills: []
+                };
+            }
 
-            const table = document.createElement("table");
-            table.className = "overview-table";
-
-            // Tabelkop
-            const thead = document.createElement("thead");
-            const headerRow = document.createElement("tr");
-
-            const skillHeader = document.createElement("th");
-            skillHeader.textContent = "Vaardigheid";
-            headerRow.appendChild(skillHeader);
-
-            groupStudents.forEach(student => {
-                const th = document.createElement("th");
-                th.textContent = student.firstname;
-                headerRow.appendChild(th);
-            });
-
-            thead.appendChild(headerRow);
-            table.appendChild(thead);
-
-            // Vaardigheden en scores
-            const tbody = document.createElement("tbody");
-
-            categorySkills.forEach(skill => {
-                const row = document.createElement("tr");
-
-                const skillCell = document.createElement("td");
-                skillCell.textContent = skill.title;
-                row.appendChild(skillCell);
-
-                progressResults.forEach(({ student, progress }) => {
-                    const cell = document.createElement("td");
-
-                    let currentProgress = progress.find(
-                      item => String(item.skillId) === String(skill.id)
-                    ) || null;
-
-                    const currentScore = Number(currentProgress?.score) || 0;
-
-                    const scoreButton = document.createElement("button");
-                    scoreButton.type = "button";
-                    scoreButton.className = "overview-score";
-                    scoreButton.textContent =
-                        ["⚪", "🟡", "🔴", "✅"][currentScore];
-
-                    scoreButton.title = [
-                        "Niet begonnen",
-                        "Met hulp",
-                        "Bijna",
-                        "Beheerst"
-                    ][currentScore];
-
-                    scoreButton.addEventListener("click", async () => {
-                        const currentValue = Number(currentProgress?.score) || 0;
-                        const nextScore = (currentValue + 1) % 4;
-                        scoreButton.disabled = true;
-
-                        try {
-                            await saveProgress(
-                                student.id,
-                                skill.id,
-                                nextScore,
-                                currentProgress?.note || ""
-                            );
-
-                            if (currentProgress) {
-                            currentProgress.score = nextScore;
-                            } else {
-                            currentProgress = {
-                              skillId: skill.id,
-                              score: nextScore,
-                              note: ""
-                            };
-
-                            progress.push(currentProgress);
-                            }
-
-                            scoreButton.textContent =
-                                ["⚪", "🟡", "🔴", "✅"][nextScore];
-
-                            scoreButton.title = [
-                                "Niet begonnen",
-                                "Met hulp",
-                                "Bijna",
-                                "Beheerst"
-                            ][nextScore];
-
-                        } catch (error) {
-                            console.error("Score opslaan mislukt:", error);
-                            alert("De score kon niet worden opgeslagen.");
-                        } finally {
-                            scoreButton.disabled = false;
-                        }
-                    });
-
-                    cell.appendChild(scoreButton);
-                    row.appendChild(cell);
-                });
-
-                tbody.appendChild(row);
-            });
-
-            table.appendChild(tbody);
-            tableWrapper.appendChild(table);
-            details.appendChild(tableWrapper);
-            groupSkillsOverview.appendChild(details);
+            stickerGroups[stickerKey].skills.push(skill);
         });
 
+        // Stickers op nummer sorteren
+        Object.values(stickerGroups)
+            .sort((a, b) => a.id - b.id)
+            .forEach(sticker => {
+
+                // Vaardigheden binnen sticker sorteren
+                sticker.skills.sort(
+                    (a, b) => Number(a.order) - Number(b.order)
+                );
+
+                const stickerDetails = document.createElement("details");
+                stickerDetails.className = "overview-sticker";
+
+                const stickerSummary = document.createElement("summary");
+                stickerSummary.textContent =
+                    `🏅 Sticker ${sticker.id} – ${sticker.title} (${sticker.skills.length} vaardigheden)`;
+
+                stickerDetails.appendChild(stickerSummary);
+
+                // Vaardigheden groeperen per categorie
+                const categories = {};
+
+                sticker.skills.forEach(skill => {
+                    const category =
+                        skill.category || "Overige vaardigheden";
+
+                    if (!categories[category]) {
+                        categories[category] = [];
+                    }
+
+                    categories[category].push(skill);
+                });
+
+                Object.entries(categories).forEach(
+                    ([category, categorySkills]) => {
+
+                        const categoryDetails =
+                            document.createElement("details");
+
+                        categoryDetails.className = "overview-category";
+
+                        const categorySummary =
+                            document.createElement("summary");
+
+                        categorySummary.textContent =
+                            `${category} (${categorySkills.length} vaardigheden)`;
+
+                        categoryDetails.appendChild(categorySummary);
+
+                        const tableWrapper =
+                            document.createElement("div");
+
+                        tableWrapper.className =
+                            "overview-table-wrapper";
+
+                        const table = document.createElement("table");
+                        table.className = "overview-table";
+
+                        // Tabelkop
+                        const thead = document.createElement("thead");
+                        const headerRow = document.createElement("tr");
+
+                        const skillHeader = document.createElement("th");
+                        skillHeader.textContent = "Vaardigheid";
+                        headerRow.appendChild(skillHeader);
+
+                        groupStudents.forEach(student => {
+                            const th = document.createElement("th");
+                            th.textContent = student.firstname;
+                            headerRow.appendChild(th);
+                        });
+
+                        thead.appendChild(headerRow);
+                        table.appendChild(thead);
+
+                        // Vaardigheden en scores
+                        const tbody = document.createElement("tbody");
+
+                        categorySkills.forEach(skill => {
+                            const row = document.createElement("tr");
+
+                            const skillCell = document.createElement("td");
+                            skillCell.textContent = skill.title;
+                            row.appendChild(skillCell);
+
+                            progressResults.forEach(
+                                ({ student, progress }) => {
+
+                                    const cell = document.createElement("td");
+
+                                    let currentProgress = progress.find(
+                                        item =>
+                                            String(item.skillId) ===
+                                            String(skill.id)
+                                    ) || null;
+
+                                    const currentScore = Math.min(
+                                        3,
+                                        Math.max(
+                                            0,
+                                            Number(currentProgress?.score) || 0
+                                        )
+                                    );
+
+                                    const scoreButton =
+                                        document.createElement("button");
+
+                                    scoreButton.type = "button";
+                                    scoreButton.className = "overview-score";
+
+                                    const scoreIcons = [
+                                        "⚪",
+                                        "🟡",
+                                        "🔴",
+                                        "✅"
+                                    ];
+
+                                    const scoreLabels = [
+                                        "Niet begonnen",
+                                        "Met hulp",
+                                        "Bijna",
+                                        "Beheerst"
+                                    ];
+
+                                    scoreButton.textContent =
+                                        scoreIcons[currentScore];
+
+                                    scoreButton.title =
+                                        scoreLabels[currentScore];
+
+                                    scoreButton.addEventListener(
+                                        "click",
+                                        async () => {
+
+                                            const currentValue = Math.min(
+                                                3,
+                                                Math.max(
+                                                    0,
+                                                    Number(currentProgress?.score) || 0
+                                                )
+                                            );
+
+                                            const nextScore =
+                                                (currentValue + 1) % 4;
+
+                                            scoreButton.disabled = true;
+
+                                            try {
+                                                await saveProgress(
+                                                    student.id,
+                                                    skill.id,
+                                                    nextScore,
+                                                    currentProgress?.note || ""
+                                                );
+
+                                                if (currentProgress) {
+                                                    currentProgress.score =
+                                                        nextScore;
+                                                } else {
+                                                    currentProgress = {
+                                                        skillId: skill.id,
+                                                        score: nextScore,
+                                                        note: ""
+                                                    };
+
+                                                    progress.push(
+                                                        currentProgress
+                                                    );
+                                                }
+
+                                                scoreButton.textContent =
+                                                    scoreIcons[nextScore];
+
+                                                scoreButton.title =
+                                                    scoreLabels[nextScore];
+
+                                            } catch (error) {
+                                                console.error(
+                                                    "Score opslaan mislukt:",
+                                                    error
+                                                );
+
+                                                alert(
+                                                    "De score kon niet worden opgeslagen."
+                                                );
+                                            } finally {
+                                                scoreButton.disabled = false;
+                                            }
+                                        }
+                                    );
+
+                                    cell.appendChild(scoreButton);
+                                    row.appendChild(cell);
+                                }
+                            );
+
+                            tbody.appendChild(row);
+                        });
+
+                        table.appendChild(tbody);
+                        tableWrapper.appendChild(table);
+                        categoryDetails.appendChild(tableWrapper);
+
+                        stickerDetails.appendChild(categoryDetails);
+                    }
+                );
+
+                groupSkillsOverview.appendChild(stickerDetails);
+            });
+
+        if (skills.length === 0) {
+            groupSkillsOverview.innerHTML +=
+                "<p>Er zijn nog geen vaardigheden beschikbaar.</p>";
+        }
+
     } catch (error) {
-        console.error("Vaardighedenoverzicht laden mislukt:", error);
+        console.error(
+            "Vaardighedenoverzicht laden mislukt:",
+            error
+        );
+
         groupSkillsOverview.innerHTML =
             "<p>Het vaardighedenoverzicht kon niet worden geladen.</p>";
     }
 }
+
 // ======================================================
 // FILTER STUDENTS
 // ======================================================

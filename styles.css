@@ -1454,3 +1454,74 @@ details summary {
     transform: translateY(0);
     box-shadow: 0 2px 5px rgba(37, 85, 173, 0.18);
 }
+
+/* =========================================
+   GROEPENOVERZICHT PER STICKER
+========================================= */
+
+.overview-sticker {
+    background: #ffffff;
+    border: 1px solid #dce5f5;
+    border-radius: 14px;
+    margin-bottom: 12px;
+    overflow: hidden;
+    box-shadow: 0 3px 10px rgba(35, 65, 120, 0.06);
+}
+
+.overview-sticker > summary {
+    cursor: pointer;
+    list-style: none;
+    padding: 17px 18px;
+    font-weight: 700;
+    color: #244b91;
+    background: linear-gradient(135deg, #edf3ff, #f8faff);
+}
+
+.overview-sticker > summary::-webkit-details-marker {
+    display: none;
+}
+
+.overview-sticker > summary::before {
+    content: "▸";
+    display: inline-block;
+    margin-right: 10px;
+    transition: transform 0.2s ease;
+}
+
+.overview-sticker[open] > summary::before {
+    transform: rotate(90deg);
+}
+
+.overview-category {
+    margin: 10px 12px;
+    border: 1px solid #e5eaf2;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.overview-category > summary {
+    cursor: pointer;
+    padding: 12px 14px;
+    font-weight: 600;
+    color: #344563;
+    background: #f7f9fc;
+    list-style: none;
+}
+
+.overview-category > summary::-webkit-details-marker {
+    display: none;
+}
+
+.overview-category > summary::before {
+    content: "＋";
+    margin-right: 8px;
+    color: #3975d7;
+}
+
+.overview-category[open] > summary::before {
+    content: "−";
+}
+
+.overview-sticker .overview-table-wrapper {
+    padding: 8px;
+}
