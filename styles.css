@@ -1428,3 +1428,29 @@ details summary {
         padding: 9px;
     }
 }
+/* Mooie knop Vaardighedenoverzicht */
+#group-skills-button {
+    background: linear-gradient(135deg, #3975d7, #2455ad);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 0 20px;
+    min-height: 42px;
+    font-size: 14px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(37, 85, 173, 0.18);
+    transition: all 0.2s ease;
+}
+
+#group-skills-button:hover {
+    background: linear-gradient(135deg, #2e66c2, #1d478f);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 14px rgba(37, 85, 173, 0.25);
+}
+
+#group-skills-button:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 5px rgba(37, 85, 173, 0.18);
+}
