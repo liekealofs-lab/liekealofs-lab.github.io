@@ -1597,3 +1597,62 @@ details summary {
         font-size: 17px;
     }
 }
+
+/* =========================================
+   MOBIEL: HORIZONTAAL SCROLLEN GROEPENOVERZICHT
+========================================= */
+
+#group-skills-overview {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
+.overview-sticker,
+.overview-category {
+    min-width: 0;
+    max-width: 100%;
+    overflow: visible;
+}
+
+.overview-table-wrapper {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    overflow-x: scroll !important;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-x;
+    scrollbar-width: auto;
+}
+
+.overview-table {
+    width: max-content !important;
+    min-width: 100%;
+    table-layout: auto;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.overview-table th,
+.overview-table td {
+    white-space: nowrap;
+}
+
+.overview-table th:first-child,
+.overview-table td:first-child {
+    position: sticky;
+    left: 0;
+    z-index: 2;
+    background: #ffffff;
+    min-width: 135px;
+    max-width: 150px;
+    white-space: normal;
+}
+
+.overview-table thead th:first-child {
+    z-index: 3;
+    background: #edf3ff;
+}
