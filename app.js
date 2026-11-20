@@ -116,6 +116,8 @@ let stickerbookCount;
 let stickerbookPercentage;
 let stickerbookProgressInner;
 let openStickerbookButton;
+let groupSkillsButton;
+let groupSkillsOverview;
 
 // ======================================================
 // INIT
@@ -181,6 +183,8 @@ stickerbookCount = document.getElementById("stickerbook-count");
 stickerbookPercentage = document.getElementById("stickerbook-percentage");
 stickerbookProgressInner = document.getElementById("stickerbook-progress-inner");
 openStickerbookButton = document.getElementById("open-stickerbook-button");
+groupSkillsButton = document.getElementById("group-skills-button");
+groupSkillsOverview = document.getElementById("group-skills-overview");
 }
 
 // ======================================================
@@ -278,6 +282,8 @@ backButton.addEventListener("click", () => {
 
   // Agenda
   document.getElementById("add-vacation").addEventListener("click", addVacation);
+
+  groupSkillsButton.addEventListener("click", showGroupSkillsOverview);
 }
 
 
@@ -291,6 +297,7 @@ function hideAll() {
   studentEdit.classList.add("hidden");
   agendaPage.classList.add("hidden");
   stickerbookPage.classList.add("hidden");
+  groupSkillsOverview.classList.add("hidden");
 }
 
 function showHome() {
@@ -374,6 +381,10 @@ async function showStudents(group) {
     groupTitle.textContent = `Superspetters in ${group}`;
     studentsList.innerHTML = "";
 
+    studentsList.classList.remove("hidden");
+    groupSkillsOverview.classList.add("hidden");
+    groupSkillsOverview.innerHTML = "";
+
     const filtered = students
         .filter(s => s.group === group)
         .sort((a, b) => a.firstname.localeCompare(b.firstname));
@@ -417,7 +428,180 @@ async function showStudents(group) {
     }
 }
 
+// ======================================================
+// VAARDIGHEDENOVERZICHT PER GROEP
+// ======================================================
 
+async function showGroupSkillsOverview() {
+    studentsList.classList.add("hidden");
+    groupSkillsOverview.classList.remove("hidden");
+    groupSkillsOverview.innerHTML = "<p>Vaardigheden laden...</p>";
+
+    const groupStudents = students
+        .filter(student => student.group === currentGroup)
+        .sort((a, b) => a.firstname.localeCompare(b.firstname));
+
+    try {
+        // Voortgang van alle kinderen ophalen
+        const progressResults = await Promise.all(
+            groupStudents.map(async student => ({
+                student,
+                progress: await apiGet(`/skill_progress/${student.id}`)
+            }))
+        );
+
+        groupSkillsOverview.innerHTML = "";
+
+        // Vaardigheden indelen per categorie
+        const categories = {};
+
+        skills.forEach(skill => {
+            const category = skill.category || "Overige vaardigheden";
+
+            if (!categories[category]) {
+                categories[category] = [];
+            }
+
+            categories[category].push(skill);
+        });
+
+        const heading = document.createElement("h3");
+        heading.textContent = "Vaardigheden van " + currentGroup;
+        groupSkillsOverview.appendChild(heading);
+
+        const explanation = document.createElement("p");
+        explanation.className = "overview-explanation";
+        explanation.textContent =
+            "Klik op een score om deze direct aan te passen.";
+        groupSkillsOverview.appendChild(explanation);
+
+        Object.entries(categories).forEach(([category, categorySkills]) => {
+            const details = document.createElement("details");
+            details.className = "overview-category";
+
+            const summary = document.createElement("summary");
+            summary.textContent =
+                `${category} (${categorySkills.length} vaardigheden)`;
+
+            details.appendChild(summary);
+
+            const tableWrapper = document.createElement("div");
+            tableWrapper.className = "overview-table-wrapper";
+
+            const table = document.createElement("table");
+            table.className = "overview-table";
+
+            // Tabelkop
+            const thead = document.createElement("thead");
+            const headerRow = document.createElement("tr");
+
+            const skillHeader = document.createElement("th");
+            skillHeader.textContent = "Vaardigheid";
+            headerRow.appendChild(skillHeader);
+
+            groupStudents.forEach(student => {
+                const th = document.createElement("th");
+                th.textContent = student.firstname;
+                headerRow.appendChild(th);
+            });
+
+            thead.appendChild(headerRow);
+            table.appendChild(thead);
+
+            // Vaardigheden en scores
+            const tbody = document.createElement("tbody");
+
+            categorySkills.forEach(skill => {
+                const row = document.createElement("tr");
+
+                const skillCell = document.createElement("td");
+                skillCell.textContent = skill.title;
+                row.appendChild(skillCell);
+
+                progressResults.forEach(({ student, progress }) => {
+                    const cell = document.createElement("td");
+
+                    let currentProgress = progress.find(
+                      item => String(item.skillId) === String(skill.id)
+                    ) || null;
+
+                    const currentScore = Number(currentProgress?.score) || 0;
+
+                    const scoreButton = document.createElement("button");
+                    scoreButton.type = "button";
+                    scoreButton.className = "overview-score";
+                    scoreButton.textContent =
+                        ["⚪", "🟡", "🔴", "✅"][currentScore];
+
+                    scoreButton.title = [
+                        "Niet begonnen",
+                        "Met hulp",
+                        "Bijna",
+                        "Beheerst"
+                    ][currentScore];
+
+                    scoreButton.addEventListener("click", async () => {
+                        const currentValue = Number(currentProgress?.score) || 0;
+                        const nextScore = (currentValue + 1) % 4;
+                        scoreButton.disabled = true;
+
+                        try {
+                            await saveProgress(
+                                student.id,
+                                skill.id,
+                                nextScore,
+                                currentProgress?.note || ""
+                            );
+
+                            if (currentProgress) {
+                            currentProgress.score = nextScore;
+                            } else {
+                            currentProgress = {
+                              skillId: skill.id,
+                              score: nextScore,
+                              note: ""
+                            };
+
+                            progress.push(currentProgress);
+                            }
+
+                            scoreButton.textContent =
+                                ["⚪", "🟡", "🔴", "✅"][nextScore];
+
+                            scoreButton.title = [
+                                "Niet begonnen",
+                                "Met hulp",
+                                "Bijna",
+                                "Beheerst"
+                            ][nextScore];
+
+                        } catch (error) {
+                            console.error("Score opslaan mislukt:", error);
+                            alert("De score kon niet worden opgeslagen.");
+                        } finally {
+                            scoreButton.disabled = false;
+                        }
+                    });
+
+                    cell.appendChild(scoreButton);
+                    row.appendChild(cell);
+                });
+
+                tbody.appendChild(row);
+            });
+
+            table.appendChild(tbody);
+            tableWrapper.appendChild(table);
+            details.appendChild(tableWrapper);
+            groupSkillsOverview.appendChild(details);
+        });
+
+    } catch (error) {
+        console.error("Vaardighedenoverzicht laden mislukt:", error);
+        groupSkillsOverview.innerHTML =
+            "<p>Het vaardighedenoverzicht kon niet worden geladen.</p>";
+    }
+}
 // ======================================================
 // FILTER STUDENTS
 // ======================================================

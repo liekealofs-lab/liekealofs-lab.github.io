@@ -1332,3 +1332,99 @@ details summary {
   opacity: 0.6;
   cursor: wait;
 }
+/* Vaardighedenoverzicht per groep */
+
+#group-skills-button {
+    margin-top: 10px;
+}
+
+.overview-explanation {
+    color: #64748b;
+    margin-bottom: 16px;
+}
+
+.overview-category {
+    background: white;
+    border: 1px solid #dce4f2;
+    border-radius: 12px;
+    margin-bottom: 12px;
+    overflow: hidden;
+}
+
+.overview-category summary {
+    cursor: pointer;
+    padding: 16px;
+    font-weight: 700;
+    color: #1d2a4a;
+    background: #f3f6ff;
+}
+
+.overview-table-wrapper {
+    overflow-x: auto;
+    width: 100%;
+}
+
+.overview-table {
+    border-collapse: collapse;
+    min-width: 100%;
+    width: max-content;
+}
+
+.overview-table th,
+.overview-table td {
+    padding: 12px;
+    border-bottom: 1px solid #e5eaf2;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.overview-table th:first-child,
+.overview-table td:first-child {
+    text-align: left;
+    min-width: 180px;
+    position: sticky;
+    left: 0;
+    background: white;
+    z-index: 1;
+}
+
+.overview-table th {
+    background: #f8faff;
+    font-weight: 700;
+}
+
+.overview-score {
+    border: 0;
+    background: #f1f4fa;
+    border-radius: 9px;
+    width: 42px;
+    height: 38px;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+.overview-score:disabled {
+    opacity: 0.5;
+    cursor: wait;
+}
+
+.overview-score:hover {
+    background: #e1e9ff;
+}
+
+@media (max-width: 600px) {
+    .search-toolbar {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    #group-skills-button {
+        width: 100%;
+    }
+
+    .overview-table th,
+    .overview-table td {
+        padding: 9px;
+    }
+}
