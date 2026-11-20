@@ -398,15 +398,15 @@ async function showStudents(group) {
             );
         }
 
-        const totalScore = progress.reduce(
-            (sum, p) => sum + (Number(p.score) || 0),
-            0
-        );
+      // Tel alleen vaardigheden die volledig beheerst worden
+      const completedSkills = progress.filter(
+       p => Number(p.score) === 3
+      ).length;
 
-        const maxScore = skills.length * 3;
-        const avg = maxScore
-            ? Math.round((totalScore / maxScore) * 100)
-            : 0;
+      // Percentage = beheerde vaardigheden / totaal aantal vaardigheden
+      const avg = skills.length
+       ? Math.round((completedSkills / skills.length) * 100)
+        : 0;
 
         const card = document.createElement("div");
         card.className = "student-card";
