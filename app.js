@@ -197,10 +197,6 @@ function attachEvents() {
     showGroups();
   });
 
-  homeAgenda.addEventListener("click", () => {
-    showAgenda();
-  });
-
   // Header-knoppen
   toHome.addEventListener("click", showHome);
 
