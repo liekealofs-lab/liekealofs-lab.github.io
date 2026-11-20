@@ -51,6 +51,7 @@ let skills = [];
 let currentGroup = "";
 let currentStudent = null;
 let vacations = [];
+let studentStickerProgress = [];
 
 // ======================================================
 // STICKERS
@@ -266,7 +267,6 @@ backButton.addEventListener("click", () => {
     editGroup.focus();
   });
 
-  editStickerButton.addEventListener("click", editSticker);
 
   saveStudentEdit.addEventListener("click", saveStudent);
   deleteStudentBtn.addEventListener("click", deleteStudent);
@@ -377,7 +377,7 @@ async function showStudents(group) {
     .sort((a, b) => a.firstname.localeCompare(b.firstname));
 
   for (const student of filtered) {
-    let progress = await apiGet(`/progress/${student.id}`);
+    let progress = await apiGet(`/skill_progress/${studentId}`);
 
     const totalScore = progress.reduce((sum, p) => sum + p.score, 0);
     const maxScore = skills.length * 3;
@@ -411,24 +411,29 @@ function filterStudents() {
 // ======================================================
 // EDIT STUDENT
 // ======================================================
-async function editStudent(student) {
+  async function editStudent(student) {
   hideAll();
   studentEdit.classList.remove("hidden");
   currentStudent = student;
 
   headerTitle.textContent = student.firstname;
-
   studentName.textContent = student.firstname;
   studentGroupBadge.textContent = student.group;
-  studentSticker.textContent = student.sticker ?? 0;
 
   editFirstname.value = student.firstname;
   editGroup.value = student.group;
 
   document.getElementById("student-form").classList.add("hidden");
 
-  const progress = await apiGet(`/progress/${student.id}`);
-  renderSkills(progress);
+  try {
+    const progress = await apiGet(`/skill_progress/${student.id}`);
+    renderSkills(progress);
+  } catch (error) {
+    console.error("Vaardigheden ophalen mislukt:", error);
+    alert("De vaardigheden konden niet worden opgehaald.");
+  }
+
+  await loadStudentStickerProgress();
 }
 
 // ======================================================
@@ -537,7 +542,7 @@ function renderSkills(studentProgress) {
 // SAVE PROGRESS
 // ======================================================
 async function saveProgress(studentId, skillId, score, note) {
-  await apiPatch(`/progress/${studentId}/${skillId}`, { score, note });
+  await apiPatch(`/skill_progress/${studentId}/${skillId}`, { score, note });
 }
 
 // ======================================================
@@ -577,7 +582,7 @@ async function saveNewStudent() {
         }
 
         for (const skill of skills) {
-            await apiPatch(`/progress/${newStudent.id}/${skill.id}`, {
+            await apiPatch(`/skill_progress/${newStudent.id}/${skill.id}`, {
                 score: 0,
                 note: ""
             });
@@ -607,20 +612,6 @@ async function saveNewStudent() {
 }
 
 
-// ======================================================
-// STICKER
-// ======================================================
-async function editSticker() {
-  const newSticker = prompt("Nieuwe stickerwaarde:", currentStudent.sticker ?? 0);
-  if (newSticker === null) return;
-
-  const value = Number(newSticker);
-  if (isNaN(value)) return alert("Voer een geldig getal in.");
-
-  await apiPatch(`/students/${currentStudent.id}`, { sticker: value });
-  currentStudent.sticker = value;
-  studentSticker.textContent = value;
-}
 
 // ======================================================
 // SAVE STUDENT
@@ -655,6 +646,144 @@ async function deleteStudent(e) {
   await loadAllData();
   showStudents(currentGroup);
 }
+
+
+// =========================================
+// STICKERBOEK - BACKEND
+// =========================================
+
+async function loadStudentStickerProgress() {
+  try {
+    studentStickerProgress = await apiGet(
+      `/sticker_progress/${currentStudent.id}`
+    );
+
+    updateStickerCount();
+  } catch (error) {
+    console.error("Stickergegevens ophalen mislukt:", error);
+    studentSticker.textContent = "?";
+  }
+}
+
+function updateStickerCount() {
+  const achievedCount = STICKERS.filter(sticker => {
+    const progress = studentStickerProgress.find(
+      item => item.stickerId === sticker.id
+    );
+
+    return progress?.achieved === true;
+  }).length;
+
+  studentSticker.textContent = achievedCount;
+}
+
+// Stickerboek openen
+async function showStickerbook() {
+  hideAll();
+
+  stickerbookPage.classList.remove("hidden");
+  headerTitle.textContent = "Stickerboek";
+
+  stickerbookTitle.textContent =
+    `Stickerboek van ${currentStudent.firstname}`;
+
+  stickerbookGrid.innerHTML = "<p>Stickerboek laden...</p>";
+
+  try {
+    await loadStudentStickerProgress();
+    renderStickerbook();
+  } catch (error) {
+    console.error(error);
+    stickerbookGrid.innerHTML =
+      "<p>Het stickerboek kon niet worden geladen.</p>";
+  }
+}
+
+// Stickerboek tekenen
+function renderStickerbook() {
+  stickerbookGrid.innerHTML = "";
+
+  const achievedCount = STICKERS.filter(sticker => {
+    const progress = studentStickerProgress.find(
+      item => item.stickerId === sticker.id
+    );
+
+    return progress?.achieved === true;
+  }).length;
+
+  const percentage = Math.round(
+    (achievedCount / STICKERS.length) * 100
+  );
+
+  stickerbookCount.textContent =
+    `${achievedCount} van ${STICKERS.length} stickers behaald`;
+
+  stickerbookPercentage.textContent = `${percentage}%`;
+
+  stickerbookProgressInner.style.width = `${percentage}%`;
+
+  studentSticker.textContent = achievedCount;
+
+  STICKERS.forEach(sticker => {
+    const progress = studentStickerProgress.find(
+      item => item.stickerId === sticker.id
+    );
+
+    const achieved = progress?.achieved === true;
+
+    const card = document.createElement("button");
+    card.type = "button";
+    card.className = `sticker-card ${achieved ? "achieved" : "locked"}`;
+
+    card.innerHTML = `
+      <div class="sticker-number">Sticker ${sticker.id}</div>
+      <div class="sticker-image">${sticker.icon}</div>
+      <div class="sticker-name">${sticker.title}</div>
+      <div class="sticker-status">
+        ${achieved ? "✓ Behaald" : "Nog te behalen"}
+      </div>
+    `;
+
+    card.addEventListener("click", () => {
+      toggleStudentSticker(sticker, achieved, card);
+    });
+
+    stickerbookGrid.appendChild(card);
+  });
+}
+
+// Sticker aanvinken of uitvinken
+async function toggleStudentSticker(sticker, achieved, card) {
+  card.disabled = true;
+
+  try {
+    const result = await apiPatch(
+      `/sticker_progress/${currentStudent.id}/${sticker.id}`,
+      { achieved: !achieved }
+    );
+
+    const index = studentStickerProgress.findIndex(
+      item => item.stickerId === sticker.id
+    );
+
+    if (index >= 0) {
+      studentStickerProgress[index] = result;
+    } else {
+      studentStickerProgress.push(result);
+    }
+
+    renderStickerbook();
+
+  } catch (error) {
+    console.error("Sticker opslaan mislukt:", error);
+    alert(
+      "De sticker kon niet worden opgeslagen. Controleer of deze sticker voor deze leerling in de backend bestaat."
+    );
+
+    card.disabled = false;
+  }
+}
+
 // ======================================================
 // AGENDA - Vakanties toevoegen, tonen en verwijderen
 // ======================================================

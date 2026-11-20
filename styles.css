@@ -1277,3 +1277,58 @@ details summary {
     padding: 17px;
   }
 }
+
+/* Stickerboekknop op leerlingpagina */
+#student-edit .stickerbook-button {
+  width: 100%;
+  min-height: 90px;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: linear-gradient(135deg, #2455a4, #3975ce);
+  color: white;
+  border: none;
+  border-radius: 18px;
+  box-shadow: 0 6px 16px rgba(36, 85, 164, 0.22);
+  cursor: pointer;
+  text-align: left;
+}
+
+#student-edit .stickerbook-button strong,
+#student-edit .stickerbook-button small {
+  display: block;
+  color: white;
+}
+
+#student-edit .stickerbook-button small {
+  margin-top: 5px;
+  color: #e2ebff;
+}
+
+#student-edit .stickerbook-button-icon {
+  font-size: 2rem;
+}
+
+#student-edit .stickerbook-arrow {
+  margin-left: auto;
+  font-size: 2rem;
+}
+
+#student-edit .student-sticker-count {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+#student-edit .sticker-count-label {
+  font-size: 0.8rem;
+  color: #637493;
+  font-weight: 600;
+}
+
+.sticker-card:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
