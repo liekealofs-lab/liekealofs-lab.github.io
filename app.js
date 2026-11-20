@@ -203,10 +203,10 @@ function attachEvents() {
 backButton.addEventListener("click", () => {
 
   // Vanuit het stickerboek terug naar de leerling
-  if (!stickerbookPage.classList.contains("hidden")) {
-    showStudentDetail();
-    return;
-  }
+if (!stickerbookPage.classList.contains("hidden")) {
+  editStudent(currentStudent);
+  return;
+}
 
   // Vanuit leerling bewerken terug naar de leerlingenlijst
   if (!studentEdit.classList.contains("hidden")) {
