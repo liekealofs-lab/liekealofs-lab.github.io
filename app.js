@@ -277,9 +277,6 @@ backButton.addEventListener("click", () => {
 
   openStickerbookButton.addEventListener("click", showStickerbook);
 
-  // Zoeken
-  studentSearch.addEventListener("input", filterStudents);
-
   // Agenda
   document.getElementById("add-vacation").addEventListener("click", addVacation);
 
