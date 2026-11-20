@@ -1378,15 +1378,7 @@ details summary {
     white-space: nowrap;
 }
 
-.overview-table th:first-child,
-.overview-table td:first-child {
-    text-align: left;
-    min-width: 180px;
-    position: sticky;
-    left: 0;
-    background: white;
-    z-index: 1;
-}
+
 
 .overview-table th {
     background: #f8faff;
@@ -1556,17 +1548,7 @@ details summary {
     padding: 10px 12px;
 }
 
-/* Vaardigheid zichtbaar houden tijdens scrollen */
-.overview-table th:first-child,
-.overview-table td:first-child {
-    position: sticky;
-    left: 0;
-    z-index: 2;
-    background: #ffffff;
-    min-width: 150px;
-    max-width: 190px;
-    white-space: normal;
-}
+
 
 .overview-table thead th:first-child {
     z-index: 3;
@@ -1641,22 +1623,86 @@ details summary {
     white-space: nowrap;
 }
 
-/* Eerste kolom blijft zichtbaar tijdens horizontaal scrollen */
-.overview-table th:first-child,
-.overview-table td:first-child {
-    position: sticky;
-    left: 0;
-    z-index: 5;
-    background-color: #ffffff;
-    min-width: 135px;
-    max-width: 150px;
-    white-space: normal;
-    box-shadow: 3px 0 5px rgba(0, 0, 0, 0.08);
-}
+
 
 /* Kop van de eerste kolom */
 .overview-table thead th:first-child {
     z-index: 6;
     background-color: #edf3ff;
+}
+
+/* =========================================
+   DEFINITIEVE MOBIELE OPLOSSING GROEPENOVERZICHT
+========================================= */
+
+@media (max-width: 768px) {
+
+    #group-skills-overview {
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        overflow: hidden;
+    }
+
+    .overview-sticker,
+    .overview-category {
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        overflow: hidden;
+        box-sizing: border-box;
+    }
+
+    .overview-table-wrapper {
+        display: block;
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        overflow-x: auto !important;
+        overflow-y: hidden !important;
+        -webkit-overflow-scrolling: touch;
+        touch-action: pan-x;
+        box-sizing: border-box;
+    }
+
+    .overview-table {
+        width: max-content !important;
+        min-width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+    .overview-table th,
+    .overview-table td {
+        white-space: nowrap;
+        position: static !important;
+        left: auto !important;
+        z-index: auto !important;
+        box-shadow: none !important;
+        padding: 10px 8px;
+        font-size: 12px;
+    }
+
+    .overview-table th:first-child,
+    .overview-table td:first-child {
+        position: static !important;
+        left: auto !important;
+        z-index: auto !important;
+        min-width: 135px;
+        max-width: none;
+        white-space: normal;
+        background: transparent;
+        box-shadow: none !important;
+    }
+
+    .overview-table thead th:first-child {
+        background: #edf3ff;
+    }
+
+    .overview-score {
+        min-width: 38px;
+        min-height: 38px;
+        font-size: 17px;
+    }
 }
 
