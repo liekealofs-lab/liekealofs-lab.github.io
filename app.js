@@ -482,13 +482,17 @@ async function showGroupSkillsOverview() {
                 ? stickerId
                 : 0;
 
-            if (!stickerGroups[stickerKey]) {
-                stickerGroups[stickerKey] = {
-                    id: stickerKey,
-                    title: skill.stickerName || "Niet gekoppeld",
-                    skills: []
-                };
-            }
+if (!stickerGroups[stickerKey]) {
+    const localSticker = STICKERS.find(
+        sticker => Number(sticker.id) === stickerKey
+    );
+
+    stickerGroups[stickerKey] = {
+        id: stickerKey,
+        title: skill.stickerName || localSticker?.title || "Onbekende sticker",
+        skills: []
+    };
+}
 
             stickerGroups[stickerKey].skills.push(skill);
         });
