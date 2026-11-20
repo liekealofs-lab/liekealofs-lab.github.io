@@ -201,17 +201,32 @@ function attachEvents() {
   toHome.addEventListener("click", showHome);
 
 backButton.addEventListener("click", () => {
+
+  // Vanuit het stickerboek terug naar de leerling
   if (!stickerbookPage.classList.contains("hidden")) {
     showStudentDetail();
-  } else if (!studentEdit.classList.contains("hidden")) {
-    showStudents(currentGroup);
-  } else if (!studentsContainer.classList.contains("hidden")) {
-    showGroups();
-  } else if (!agendaPage.classList.contains("hidden")) {
-    showHome();
-  } else {
-    showHome();
+    return;
   }
+
+  // Vanuit leerling bewerken terug naar de leerlingenlijst
+  if (!studentEdit.classList.contains("hidden")) {
+    showStudents(currentGroup);
+    return;
+  }
+
+  // Vanuit leerlingenlijst terug naar groepen
+  if (!studentsContainer.classList.contains("hidden")) {
+    showGroups();
+    return;
+  }
+
+  // Vanuit agenda terug naar beginscherm
+  if (!agendaPage.classList.contains("hidden")) {
+    showHome();
+    return;
+  }
+
+  showHome();
 });
 
   // Nieuwe student (header-knop opent modal)
