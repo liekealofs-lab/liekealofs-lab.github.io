@@ -364,38 +364,59 @@ function loadGroups() {
 // ======================================================
 // STUDENTS IN GROUP
 // ======================================================
+
 async function showStudents(group) {
-  hideAll();
-  studentsContainer.classList.remove("hidden");
-  currentGroup = group;
-  headerTitle.textContent = `Superspetters in ${group}`;
-  groupTitle.textContent = `Superspetters in ${group}`;
-  studentsList.innerHTML = "";
+    hideAll();
+    studentsContainer.classList.remove("hidden");
 
-  const filtered = students
-    .filter(s => s.group === group)
-    .sort((a, b) => a.firstname.localeCompare(b.firstname));
+    currentGroup = group;
+    headerTitle.textContent = `Superspetters in ${group}`;
+    groupTitle.textContent = `Superspetters in ${group}`;
+    studentsList.innerHTML = "";
 
-  for (const student of filtered) {
-    let progress = await apiGet(`/skill_progress/${studentId}`);
+    const filtered = students
+        .filter(s => s.group === group)
+        .sort((a, b) => a.firstname.localeCompare(b.firstname));
 
-    const totalScore = progress.reduce((sum, p) => sum + p.score, 0);
-    const maxScore = skills.length * 3;
-    const avg = maxScore ? Math.round((totalScore / maxScore) * 100) : 0;
+    for (const student of filtered) {
+        let progress = [];
 
-    const card = document.createElement("div");
-    card.className = "student-card";
-    card.innerHTML = `
-      <div class="student-card-title">${student.firstname}</div>
-      <div class="progress-bar-outer">
-        <div class="progress-bar-inner" style="width:${avg}%;"></div>
-      </div>
-      <div class="progress-label">${avg}%</div>
-    `;
-    card.addEventListener("click", () => editStudent(student));
-    studentsList.appendChild(card);
-  }
+        try {
+            progress = await apiGet(`/skill_progress/${student.id}`);
+        } catch (error) {
+            console.error(
+                `Voortgang ophalen mislukt voor ${student.firstname}:`,
+                error
+            );
+        }
+
+        const totalScore = progress.reduce(
+            (sum, p) => sum + (Number(p.score) || 0),
+            0
+        );
+
+        const maxScore = skills.length * 3;
+        const avg = maxScore
+            ? Math.round((totalScore / maxScore) * 100)
+            : 0;
+
+        const card = document.createElement("div");
+        card.className = "student-card";
+
+        card.innerHTML = `
+            <div class="student-card-title">${student.firstname}</div>
+            <div class="progress-bar-outer">
+                <div class="progress-bar-inner" style="width:${avg}%;">
+                </div>
+            </div>
+            <div class="progress-label">${avg}%</div>
+        `;
+
+        card.addEventListener("click", () => editStudent(student));
+        studentsList.appendChild(card);
+    }
 }
+
 
 // ======================================================
 // FILTER STUDENTS
