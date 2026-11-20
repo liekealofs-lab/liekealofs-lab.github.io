@@ -1641,18 +1641,22 @@ details summary {
     white-space: nowrap;
 }
 
+/* Eerste kolom blijft zichtbaar tijdens horizontaal scrollen */
 .overview-table th:first-child,
 .overview-table td:first-child {
     position: sticky;
     left: 0;
-    z-index: 2;
-    background: #ffffff;
+    z-index: 5;
+    background-color: #ffffff;
     min-width: 135px;
     max-width: 150px;
     white-space: normal;
+    box-shadow: 3px 0 5px rgba(0, 0, 0, 0.08);
 }
 
+/* Kop van de eerste kolom */
 .overview-table thead th:first-child {
-    z-index: 3;
-    background: #edf3ff;
+    z-index: 6;
+    background-color: #edf3ff;
 }
+
